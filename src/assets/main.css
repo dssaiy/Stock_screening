@@ -1,0 +1,182 @@
+@import "./theme.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 自定义全局样式 */
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-tap-highlight-color: transparent; /* 移除移动端点击高亮 */
+    overflow-x: hidden; /* 防止水平滚动 */
+  }
+
+  /* 改善移动端触摸体验 */
+  button,
+  a,
+  input,
+  select,
+  [role="button"] {
+    @apply touch-manipulation;
+  }
+
+  /* 确保所有可点击元素在悬停时显示指针 */
+  button,
+  a,
+  [role="button"],
+  label[for],
+  input[type="checkbox"],
+  input[type="radio"] {
+    @apply cursor-pointer;
+  }
+
+  /* 改善移动端表单元素体验 */
+  input,
+  select,
+  textarea {
+    @apply text-base sm:text-sm;
+    font-size: 16px !important; /* 防止iOS缩放 */
+  }
+
+  /* 确保图像响应式 */
+  img {
+    @apply max-w-full h-auto;
+  }
+}
+
+/* 自定义组件样式 */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+    disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.9;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground;
+  }
+
+  .btn-secondary:hover {
+    opacity: 0.8;
+  }
+
+  .btn-accent {
+    @apply bg-accent text-accent-foreground;
+  }
+
+  .btn-accent:hover {
+    opacity: 0.8;
+  }
+
+  .card {
+    @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm;
+  }
+
+  .input {
+    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm
+    ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium
+    placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2
+    focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* 增强表单元素交互性 */
+  .checkbox,
+  input[type="checkbox"],
+  input[type="radio"],
+  label[for] {
+    @apply cursor-pointer;
+  }
+
+  /* 增强标签点击区域 */
+  label.flex {
+    @apply transition-colors duration-200 hover:bg-muted hover:bg-opacity-30 rounded-md;
+  }
+}
+
+/* 参数提示相关样式 */
+@layer components {
+  .info-icon {
+    @apply text-primary opacity-70 hover:text-primary hover:opacity-100 transition-colors;
+  }
+
+  .tooltip-inner {
+    @apply bg-card bg-opacity-85 backdrop-blur-md border border-border border-opacity-30 rounded-md p-3 text-sm;
+    border-left: 3px solid hsl(var(--primary));
+    box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.15);
+  }
+
+  .dark .tooltip-inner {
+    @apply bg-card bg-opacity-90;
+  }
+}
+
+/* 响应式优化 */
+@layer utilities {
+  @media (max-width: 640px) {
+    /* 移动设备上优化表单元素 */
+    .input,
+    select,
+    textarea {
+      padding: 0.625rem 0.75rem !important;
+    }
+
+    /* 移动设备上优化按钮 */
+    .btn {
+      padding: 0.5rem 0.75rem !important;
+    }
+
+    /* 移动设备上优化卡片内边距 */
+    .card {
+      padding: 0.75rem !important;
+    }
+
+    /* 移动设备上优化表格 */
+    table {
+      font-size: 0.875rem !important;
+    }
+
+    /* 移动设备上优化标题 */
+    h1 {
+      font-size: 1.125rem !important;
+    }
+
+    h2 {
+      font-size: 1rem !important;
+    }
+
+    h3 {
+      font-size: 0.875rem !important;
+    }
+  }
+}
+
+/* 动画类 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(20px);
+  opacity: 0;
+}

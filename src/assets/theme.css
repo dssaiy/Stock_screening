@@ -1,0 +1,143 @@
+/* 基础样式 - 导入字体 */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap");
+
+:root {
+  /* 基于高达RX-78-2的白色主体 */
+  --background: oklch(0.98 0 236.5);
+  --foreground: oklch(0.25 0 0);
+
+  /* 卡片使用高达白色 */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.25 0 0);
+
+  /* 弹出框使用纯白 */
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.25 0 0);
+
+  /* 主色调使用高达红色 */
+  --primary: oklch(0.65 0.26 25.5);
+  --primary-foreground: oklch(1 0 0);
+
+  /* 次要色调使用高达蓝色 */
+  --secondary: oklch(0.6 0.18 260);
+  --secondary-foreground: oklch(1 0 0);
+
+  /* 柔和色调使用淡蓝色 */
+  --muted: oklch(0.9 0.05 260);
+  --muted-foreground: oklch(0.45 0.02 264.36);
+
+  /* 强调色使用高达黄色 */
+  --accent: oklch(0.88 0.2 90);
+  --accent-foreground: oklch(0.25 0 0);
+
+  /* 破坏性操作使用高达红色 */
+  --destructive: oklch(0.65 0.26 25.5);
+  --destructive-foreground: oklch(1 0 0);
+
+  /* 边框使用淡灰色 */
+  --border: oklch(0.85 0.01 247.88);
+  --input: oklch(0.9 0 264.54);
+  --ring: oklch(0.65 0.26 25.5);
+
+  /* 图表颜色使用高达配色 */
+  --chart-1: oklch(0.65 0.26 25.5); /* 红 */
+  --chart-2: oklch(0.6 0.18 260); /* 蓝 */
+  --chart-3: oklch(0.88 0.2 90); /* 黄 */
+  --chart-4: oklch(0.95 0 0); /* 白 */
+  --chart-5: oklch(0.3 0 0); /* 深灰 */
+
+  /* 侧边栏使用高达蓝色 */
+  --sidebar: oklch(0.6 0.18 260);
+  --sidebar-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(0.88 0.2 90);
+  --sidebar-primary-foreground: oklch(0.25 0 0);
+  --sidebar-accent: oklch(0.95 0 0);
+  --sidebar-accent-foreground: oklch(0.25 0 0);
+  --sidebar-border: oklch(0.7 0.1 260);
+  --sidebar-ring: oklch(0.65 0.26 25.5);
+
+  /* 保持原有字体和圆角设置 */
+  --font-sans: Inter, sans-serif;
+  --font-serif: Source Serif 4, serif;
+  --font-mono: JetBrains Mono, monospace;
+  --radius: 0.75rem;
+
+  /* 保持原有阴影设置 */
+  --shadow-2xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-sm: 0px 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0px 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow: 0px 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0px 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow-md: 0px 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0px 2px 4px -1px hsl(0 0% 0% / 0.1);
+  --shadow-lg: 0px 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0px 4px 6px -1px hsl(0 0% 0% / 0.1);
+  --shadow-xl: 0px 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0px 8px 10px -1px hsl(0 0% 0% / 0.1);
+  --shadow-2xl: 0px 1px 3px 0px hsl(0 0% 0% / 0.25);
+}
+
+.dark {
+  --background: oklch(0.26 0.03 262.67);
+  --foreground: oklch(0.92 0 0);
+  --card: oklch(0.31 0.03 268.64);
+  --card-foreground: oklch(0.92 0 0);
+  --popover: oklch(0.29 0.02 268.4);
+  --popover-foreground: oklch(0.92 0 0);
+  --primary: oklch(0.64 0.17 36.44);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.31 0.03 266.71);
+  --secondary-foreground: oklch(0.92 0 0);
+  --muted: oklch(0.31 0.03 266.71);
+  --muted-foreground: oklch(0.72 0 0);
+  --accent: oklch(0.34 0.06 267.59);
+  --accent-foreground: oklch(0.88 0.06 254.13);
+  --destructive: oklch(0.64 0.21 25.33);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.38 0.03 269.73);
+  --input: oklch(0.38 0.03 269.73);
+  --ring: oklch(0.64 0.17 36.44);
+  --chart-1: oklch(0.72 0.06 248.68);
+  --chart-2: oklch(0.77 0.09 34.19);
+  --chart-3: oklch(0.58 0.08 254.16);
+  --chart-4: oklch(0.5 0.08 259.49);
+  --chart-5: oklch(0.42 0.1 264.03);
+  --sidebar: oklch(0.31 0.03 267.74);
+  --sidebar-foreground: oklch(0.92 0 0);
+  --sidebar-primary: oklch(0.64 0.17 36.44);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.34 0.06 267.59);
+  --sidebar-accent-foreground: oklch(0.88 0.06 254.13);
+  --sidebar-border: oklch(0.38 0.03 269.73);
+  --sidebar-ring: oklch(0.64 0.17 36.44);
+  --font-sans: Inter, sans-serif;
+  --font-serif: Source Serif 4, serif;
+  --font-mono: JetBrains Mono, monospace;
+  --radius: 0.75rem;
+  --shadow-2xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-sm: 0px 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0px 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow: 0px 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0px 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow-md: 0px 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0px 2px 4px -1px hsl(0 0% 0% / 0.1);
+  --shadow-lg: 0px 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0px 4px 6px -1px hsl(0 0% 0% / 0.1);
+  --shadow-xl: 0px 1px 3px 0px hsl(0 0% 0% / 0.1),
+    0px 8px 10px -1px hsl(0 0% 0% / 0.1);
+  --shadow-2xl: 0px 1px 3px 0px hsl(0 0% 0% / 0.25);
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* 暗色模式切换 */
+.dark body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
