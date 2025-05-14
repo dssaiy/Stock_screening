@@ -184,7 +184,7 @@ app = FastAPI(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify the frontend domain
+    allow_origins=["https://gleaming-tanuki-7aafab.netlify.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -194,7 +194,9 @@ app.add_middleware(
 app.include_router(case_router, prefix="/api")
 
 # --- API Endpoints ---
-
+@app.get("/health")
+async def health():
+    return {"status": "OK"}
 
 @app.get("/")
 async def root():
