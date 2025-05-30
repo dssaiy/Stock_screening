@@ -7,3 +7,4 @@ pydantic>=1.10.0    # For request/response models
 python-dotenv     # Optional: For local environment variables if needed
 scipy
 tqdm>=4.64.0      # For progress bars
+diskcache>=5.6.0

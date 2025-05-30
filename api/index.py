@@ -10,9 +10,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 import sys
 import os
+from diskcache import Cache
+import hashlib
+import json # 确保json已导入，如果未导入则添加
+# 🚩【项目根路径自动添加到sys.path，便于模块导入】-------------------
+import os
+import sys
+# 获取当前文件所在的目录 (api/)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# 获取项目根目录 (Stock screening/)
+project_root = os.path.dirname(current_dir)
+# 将项目根目录添加到 Python 路径
+sys.path.insert(0, project_root)
+# ------------------------------------------------------------
 
-# 添加当前目录到 Python 路径，以便导入模块
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ 
 
 
 # Import our modular components (using absolute imports)
@@ -169,12 +181,15 @@ class TaskStatusResponse(BaseModel):
     message: str
     result: Optional[List[StockScanResult]] = None
     error: Optional[str] = None
+    cached: bool = False # 新增字段
     created_at: float
     updated_at: float
     completed_at: Optional[float] = None
 
 
 # Initialize FastAPI app
+scan_results_cache = Cache("cache/scan_results", cull_limit=5)
+
 app = FastAPI(
     title="Stock Platform Scanner API",
     description="API for scanning stocks for platform consolidation patterns",
@@ -232,8 +247,36 @@ async def start_scan(config_request: ScanConfigRequest, background_tasks: Backgr
     for key, value in config_dict.items():
         print(f"  - {key}: {Fore.GREEN}{value}{Style.RESET_ALL}")
 
+    # 生成缓存键
+    config_json = config_request.model_dump_json()
+    cache_key = hashlib.md5(config_json.encode('utf-8')).hexdigest()
+
+    print(f"{Fore.BLUE}生成的配置 JSON (用于缓存键):{Style.RESET_ALL}")
+    print(f"{Fore.BLUE}{config_json}{Style.RESET_ALL}")
+    print(f"{Fore.BLUE}生成的缓存键: {cache_key}{Style.RESET_ALL}")
+
+    # 尝试从缓存加载
+    cached_result = scan_results_cache.get(cache_key)
+
+    if cached_result:
+        print(f"{Fore.GREEN}从分析结果缓存加载: {cache_key} 😊{Style.RESET_ALL}")
+        task_manager.update_task(
+            task_id,
+            status=TaskStatus.COMPLETED,
+            progress=100,
+            message="Scan completed from cache.",
+            result=cached_result,
+            cached=True # 新增字段
+        )
+        return TaskCreationResponse(
+            task_id=task_id,
+            message="Scan started successfully. Result loaded from cache."
+        )
+    else:
+        print(f"{Fore.YELLOW}分析结果缓存未命中，开始执行扫描: {cache_key} 🌐{Style.RESET_ALL}")
+
     # Start the scan in the background
-    def run_scan_task():
+    def run_scan_task(task_id: str, config_dict: Dict[str, any], cache_key: str):
         try:
             # Fetch stock basics
             with BaostockConnectionManager():
@@ -341,13 +384,18 @@ async def start_scan(config_request: ScanConfigRequest, background_tasks: Backgr
                             f"{Fore.RED}Error creating StockScanResult: {e}{Style.RESET_ALL}")
                         continue
 
+                # 将结果存入缓存
+                scan_results_cache.set(cache_key, [stock.model_dump() for stock in result_stocks])
+                print(f"{Fore.GREEN}分析结果已存入缓存: {cache_key} ✅{Style.RESET_ALL}")
+
                 # Update task with final result
                 task_manager.update_task(
                     task_id,
                     status=TaskStatus.COMPLETED,
                     progress=100,
                     message=f"Scan completed. Found {len(result_stocks)} platform stocks.",
-                    result=[stock.model_dump() for stock in result_stocks]
+                    result=[stock.model_dump() for stock in result_stocks],
+                    cached=False # 新增字段
                 )
 
         except Exception as e:
@@ -360,7 +408,7 @@ async def start_scan(config_request: ScanConfigRequest, background_tasks: Backgr
             )
 
     # Start the task in the background
-    background_tasks.add_task(run_scan_task)
+    background_tasks.add_task(run_scan_task, task_id, config_dict, cache_key)
 
     # Return task ID
     return TaskCreationResponse(

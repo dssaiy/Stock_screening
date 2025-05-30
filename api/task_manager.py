@@ -27,40 +27,43 @@ class TaskStatus(Enum):
 class Task:
     """Represents a background task with status tracking."""
 
-    def __init__(self, task_id: str):
+    def __init__(self, task_id: str, created_at: float,
+                 status: str = TaskStatus.PENDING, progress: int = 0,
+                 message: str = "Task created", result: Optional[List[Dict[str, Any]]] = None,
+                 error: Optional[str] = None, updated_at: Optional[float] = None,
+                 completed_at: Optional[float] = None,
+                 cached: bool = False):
         self.task_id = task_id
-        self.status = TaskStatus.PENDING
-        self.result = None
-        self.error = None
-        self.progress = 0
-        self.message = "Task initialized"
-        self.created_at = time.time()
-        self.updated_at = time.time()
-        self.completed_at = None
+        self.status = status
+        self.progress = progress
+        self.message = message
+        self.result = result
+        self.error = error
+        self.created_at = created_at
+        self.updated_at = updated_at if updated_at is not None else created_at
+        self.completed_at = completed_at
+        self.cached = cached
 
-    def update(self, status: Optional[TaskStatus] = None,
-               progress: Optional[int] = None,
-               message: Optional[str] = None,
-               result: Any = None,
-               error: Optional[str] = None) -> None:
-        """Update task status and details."""
+    def update(self, status: Optional[str] = None, progress: Optional[int] = None,
+               message: Optional[str] = None, result: Optional[List[Dict[str, Any]]] = None,
+               error: Optional[str] = None, completed_at: Optional[float] = None,
+               cached: Optional[bool] = None):
         if status:
-            self.status = status
-            if status == TaskStatus.COMPLETED or status == TaskStatus.FAILED:
+            self.status = TaskStatus(status) # Convert string to Enum
+            if TaskStatus(status) in (TaskStatus.COMPLETED, TaskStatus.FAILED):
                 self.completed_at = time.time()
-
         if progress is not None:
             self.progress = progress
-
         if message:
             self.message = message
-
         if result is not None:
             self.result = result
-
-        if error is not None:
+        if error:
             self.error = error
-
+        if completed_at is not None:
+            self.completed_at = completed_at
+        if cached is not None:
+            self.cached = cached
         self.updated_at = time.time()
 
     def to_dict(self) -> Dict[str, Any]:
@@ -77,7 +80,8 @@ class Task:
             "error": self.error,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
-            "completed_at": self.completed_at
+            "completed_at": self.completed_at,
+            "cached": self.cached
         }
 
 
@@ -97,7 +101,7 @@ class TaskManager:
         """Create a new task and return its ID."""
         task_id = str(uuid.uuid4())
         with self._lock:
-            self._tasks[task_id] = Task(task_id)
+            self._tasks[task_id] = Task(task_id=task_id, created_at=time.time())
         return task_id
 
     def get_task(self, task_id: str) -> Optional[Task]:
