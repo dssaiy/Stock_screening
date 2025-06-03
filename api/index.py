@@ -196,6 +196,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# 配置 Uvicorn 的日志级别
+import logging
+uvicorn_logger = logging.getLogger("uvicorn")
+uvicorn_logger.setLevel(logging.WARNING) # 或者 logging.ERROR
+
+# 如果需要，也可以配置 uvicorn.access 的日志级别
+uvicorn_access_logger = logging.getLogger("uvicorn.access")
+uvicorn_access_logger.setLevel(logging.WARNING) # 或者 logging.ERROR
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,

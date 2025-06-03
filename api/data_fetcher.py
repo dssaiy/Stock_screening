@@ -9,11 +9,24 @@ import threading
 from typing import List, Dict, Any, Optional
 from colorama import Fore, Style
 import traceback
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from diskcache import Cache
 
 # 初始化全局缓存（相对于项目根目录）😊
 cache = Cache("cache/baostock_data")
+
+def get_next_1am_timestamp():
+    now = datetime.now()
+    # 设置今天的凌晨 1:00 AM
+    today_1am = datetime.combine(now.date(), time(1, 0, 0))
+    
+    # 如果当前时间已经过了今天的 1:00 AM，则设置为明天的 1:00 AM
+    if now >= today_1am:
+        next_1am = today_1am + timedelta(days=1)
+    else:
+        next_1am = today_1am
+    
+    return next_1am.timestamp()
 
 # Thread-local storage for Baostock connections
 _thread_local = threading.local()
@@ -89,7 +102,7 @@ def fetch_stock_basics() -> pd.DataFrame:
                 raise ValueError("No stock basic information retrieved")
             df = pd.DataFrame(stock_basics_list, columns=rs.fields)
             # 写入缓存，保存为当天，使用 records 格式
-            cache.set(cache_key, df.to_dict(orient='records'), expire=(datetime.now() + timedelta(days=1)).timestamp())
+            cache.set(cache_key, df.to_dict(orient='records'), expire=get_next_1am_timestamp())
             return df
 
 def fetch_industry_data() -> pd.DataFrame:
@@ -109,13 +122,15 @@ def fetch_industry_data() -> pd.DataFrame:
             rs = bs.query_stock_industry()
             if rs.error_code != '0':
                 raise ConnectionError(f"Failed to query industry data: {rs.error_msg}")
+            
             industry_list = []
             while rs.next():
                 industry_list.append(rs.get_row_data())
+            
             if not industry_list:
                 raise ValueError("No industry classification data retrieved")
             df = pd.DataFrame(industry_list, columns=rs.fields)
-            cache.set(cache_key, df.to_dict(orient='records'), expire=(datetime.now() + timedelta(days=1)).timestamp())
+            cache.set(cache_key, df.to_dict(orient='records'), expire=get_next_1am_timestamp())
             return df
 
 def fetch_kline_data(code: str, start_date: str, end_date: str,
@@ -172,7 +187,7 @@ def fetch_kline_data(code: str, start_date: str, end_date: str,
                     if col in df.columns:
                         df[col] = pd.to_numeric(df[col], errors='coerce')
                 # 缓存
-                cache.set(cache_key, df.to_dict(orient='records'), expire=(datetime.now() + timedelta(days=1)).timestamp())
+                cache.set(cache_key, df.to_dict(orient='records'), expire=get_next_1am_timestamp())
                 return df
             except Exception as e:
                 retries += 1
