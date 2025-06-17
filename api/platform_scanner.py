@@ -165,7 +165,18 @@ def scan_stocks(stock_list: List[Dict[str, Any]],
 
             try:
                 # Get K-line data
-                df = future.result()
+                try:
+                    df = future.result()
+                except Exception as e_fetch:
+                    error_count += 1
+                    print(
+                        f"{Fore.RED}Error fetching K-line data for stock {stock_code} ({stock_name}): {e_fetch}{Style.RESET_ALL}")
+                    # import traceback # Optional: for more detailed fetch error
+                    # traceback.print_exc() # Optional: for more detailed fetch error
+                    pbar.set_postfix(success=success_count, empty=empty_count,
+                                     error=error_count, platform=platform_count)
+                    pbar.update(1)
+                    continue # Skip to the next stock
 
                 if df.empty:
                     empty_count += 1
@@ -248,14 +259,19 @@ def scan_stocks(stock_list: List[Dict[str, Any]],
                         message=f"Processed {i+1}/{total_stocks} stocks. Found {platform_count} platform stocks."
                     )
 
-            except Exception as e:
+            except Exception as e_analyze: # Renamed 'e' to 'e_analyze' for clarity
                 error_count += 1
                 print(
-                    f"{Fore.RED}Error processing stock {stock_code}: {e}{Style.RESET_ALL}")
+                    f"{Fore.RED}Error analyzing stock {stock_code} ({stock_name}) after fetching data: {e_analyze}{Style.RESET_ALL}")
                 import traceback
                 traceback.print_exc()
 
             # Update progress bar
+            # This pbar update is now handled within the try/except blocks for fetch and analyze,
+            # or if df.empty. If an error occurs and we 'continue', pbar is updated there.
+            # If successful, it's updated after analysis.
+            # So, this specific update call might be redundant if all paths update it.
+            # However, keeping it ensures it updates if no other condition is met before loop end.
             pbar.set_postfix(success=success_count, empty=empty_count,
                              error=error_count, platform=platform_count)
             pbar.update(1)
