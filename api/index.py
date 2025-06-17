@@ -31,14 +31,14 @@ sys.path.insert(0, project_root)
 try:
     from api.config import ScanConfig
     from api.task_manager import task_manager, TaskStatus
-    from api.data_fetcher import fetch_stock_basics, fetch_industry_data, BaostockConnectionManager
+    from api.data_fetcher import fetch_stock_basics, fetch_industry_data, BaostockConnectionManager, get_next_1am_timestamp
     from api.platform_scanner import prepare_stock_list, scan_stocks
     from api.case_api import router as case_router
 except ImportError:
     # 如果绝对导入失败，尝试相对导入（本地开发环境）
     from .config import ScanConfig
     from .task_manager import task_manager, TaskStatus
-    from .data_fetcher import fetch_stock_basics, fetch_industry_data, BaostockConnectionManager
+    from .data_fetcher import fetch_stock_basics, fetch_industry_data, BaostockConnectionManager, get_next_1am_timestamp
     from .platform_scanner import prepare_stock_list, scan_stocks
     from .case_api import router as case_router
 
@@ -394,8 +394,8 @@ async def start_scan(config_request: ScanConfigRequest, background_tasks: Backgr
                         continue
 
                 # 将结果存入缓存
-                scan_results_cache.set(cache_key, [stock.model_dump() for stock in result_stocks])
-                print(f"{Fore.GREEN}分析结果已存入缓存: {cache_key} ✅{Style.RESET_ALL}")
+                scan_results_cache.set(cache_key, [stock.model_dump() for stock in result_stocks], expire=get_next_1am_timestamp())
+                print(f"{Fore.GREEN}分析结果已存入缓存 (有效期至次日凌晨1点): {cache_key} ✅{Style.RESET_ALL}")
 
                 # Update task with final result
                 task_manager.update_task(
