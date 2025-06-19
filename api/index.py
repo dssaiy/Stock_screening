@@ -13,6 +13,7 @@ import os
 from diskcache import Cache
 import hashlib
 import json # 确保json已导入，如果未导入则添加
+from datetime import datetime
 # 🚩【项目根路径自动添加到sys.path，便于模块导入】-------------------
 import os
 import sys
@@ -258,7 +259,8 @@ async def start_scan(config_request: ScanConfigRequest, background_tasks: Backgr
 
     # 生成缓存键
     config_json = config_request.model_dump_json()
-    cache_key = hashlib.md5(config_json.encode('utf-8')).hexdigest()
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    cache_key = f"{hashlib.md5(config_json.encode('utf-8')).hexdigest()[:8]}_{today_str}"
 
     print(f"{Fore.BLUE}生成的配置 JSON (用于缓存键):{Style.RESET_ALL}")
     print(f"{Fore.BLUE}{config_json}{Style.RESET_ALL}")
@@ -268,20 +270,28 @@ async def start_scan(config_request: ScanConfigRequest, background_tasks: Backgr
     cached_result = scan_results_cache.get(cache_key)
 
     if cached_result:
-        print(f"{Fore.GREEN}从分析结果缓存加载: {cache_key} 😊{Style.RESET_ALL}")
-        task_manager.update_task(
-            task_id,
-            status=TaskStatus.COMPLETED,
-            progress=100,
-            message="Scan completed from cache.",
-            result=cached_result,
-            cached=True # 新增字段
-        )
-        return TaskCreationResponse(
-            task_id=task_id,
-            message="Scan started successfully. Result loaded from cache."
-        )
-    else:
+        # 从缓存键中提取日期
+        cached_date = cache_key.split('_')[-1]
+        today_str = datetime.now().strftime('%Y-%m-%d')
+        if cached_date == today_str:  # 确保是当天数据
+            print(f"{Fore.GREEN}从分析结果缓存加载: {cache_key} 😊{Style.RESET_ALL}")
+            task_manager.update_task(
+                task_id,
+                status=TaskStatus.COMPLETED,
+                progress=100,
+                message="Scan completed from cache.",
+                result=cached_result,
+                cached=True
+            )
+            return TaskCreationResponse(
+                task_id=task_id,
+                message="Scan started successfully. Result loaded from cache."
+            )
+        else:
+            print(f"{Fore.YELLOW}缓存存在但日期不匹配（缓存日期: {cached_date}, 今日: {today_str}），跳过缓存{Style.RESET_ALL}")
+            cached_result = None
+
+    if not cached_result:
         print(f"{Fore.YELLOW}分析结果缓存未命中，开始执行扫描: {cache_key} 🌐{Style.RESET_ALL}")
 
     # Start the scan in the background

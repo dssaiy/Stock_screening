@@ -11,6 +11,7 @@ from colorama import Fore, Style
 import traceback
 from datetime import datetime, time, timedelta
 from diskcache import Cache
+import hashlib
 
 # 初始化全局缓存（相对于项目根目录）😊
 cache = Cache("cache/baostock_data")
@@ -83,13 +84,16 @@ def fetch_stock_basics() -> pd.DataFrame:
     Fetch basic information for all stocks, with diskcache support. ヾ(≧▽≦*)o
     """
     today_str = datetime.now().strftime('%Y-%m-%d')
-    cache_key = f"stock_basics_{today_str}"
+    cache_key = f"{hashlib.md5('stock_basics'.encode()).hexdigest()[:8]}_{today_str}"
     cached_data = cache.get(cache_key)
     if cached_data:
-        print(f"{Fore.GREEN}从缓存加载数据: {cache_key} 😊{Style.RESET_ALL}")
-        return pd.DataFrame(cached_data)
+        # 提取缓存键中的日期部分
+        cached_date = cache_key.split('_')[-1]
+        if cached_date == today_str:  # 确保是当天数据
+            print(f"{Fore.GREEN}从缓存加载数据: {cache_key} 😊{Style.RESET_ALL}")
+            return pd.DataFrame(cached_data)
     else:
-        print(f"{Fore.YELLOW}缓存未命中，从 Baostock 获取数据: {cache_key} 🌐{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}缓存未命中，从 Baostock 获取数据 (哈希键: {cache_key}) 🌐{Style.RESET_ALL}")
         with BaostockConnectionManager():
             print(f"{Fore.CYAN}Fetching stock basic information...{Style.RESET_ALL}")
             rs = bs.query_stock_basic()
@@ -110,13 +114,16 @@ def fetch_industry_data() -> pd.DataFrame:
     Fetch industry classification data for all stocks, with diskcache support. (ง •_•)ง
     """
     today_str = datetime.now().strftime('%Y-%m-%d')
-    cache_key = f"industry_data_{today_str}"
+    cache_key = f"{hashlib.md5('industry_data'.encode()).hexdigest()[:8]}_{today_str}"
     cached_data = cache.get(cache_key)
     if cached_data:
-        print(f"{Fore.GREEN}从缓存加载数据: {cache_key} 😊{Style.RESET_ALL}")
-        return pd.DataFrame(cached_data)
+        # 提取缓存键中的日期部分
+        cached_date = cache_key.split('_')[-1]
+        if cached_date == today_str:  # 确保是当天数据
+            print(f"{Fore.GREEN}从缓存加载数据: {cache_key} 😊{Style.RESET_ALL}")
+            return pd.DataFrame(cached_data)
     else:
-        print(f"{Fore.YELLOW}缓存未命中，从 Baostock 获取数据: {cache_key} 🌐{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}缓存未命中，从 Baostock 获取数据 (哈希键: {cache_key}) 🌐{Style.RESET_ALL}")
         with BaostockConnectionManager():
             print(f"{Fore.CYAN}Fetching industry classification data...{Style.RESET_ALL}")
             rs = bs.query_stock_industry()
@@ -140,13 +147,16 @@ def fetch_kline_data(code: str, start_date: str, end_date: str,
     Fetch K-line data for a specific stock with retry and diskcache logic. (`･ω･´)ゞ
     """
     today_str = datetime.now().strftime('%Y-%m-%d')
-    cache_key = f"kline_data_{code}_{start_date}_{end_date}_{today_str}"
+    cache_key = f"{hashlib.md5(f'kline_data_{code}_{start_date}_{end_date}'.encode()).hexdigest()[:8]}_{today_str}"
     cached_data = cache.get(cache_key)
     if cached_data:
-        print(f"{Fore.GREEN}从缓存加载 K 线数据: {cache_key} 😊{Style.RESET_ALL}")
-        return pd.DataFrame(cached_data)
+        # 提取缓存键中的日期部分
+        cached_date = cache_key.split('_')[-1]
+        if cached_date == today_str:  # 确保是当天数据
+            print(f"{Fore.GREEN}从缓存加载 K 线数据: {cache_key} 😊{Style.RESET_ALL}")
+            return pd.DataFrame(cached_data)
     else:
-        print(f"{Fore.YELLOW}K 线缓存未命中，从 Baostock 获取数据: {cache_key} 🌐{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}K 线缓存未命中，从 Baostock 获取数据 (哈希键: {cache_key}) 🌐{Style.RESET_ALL}")
         retries = 0
         while True:
             try:
